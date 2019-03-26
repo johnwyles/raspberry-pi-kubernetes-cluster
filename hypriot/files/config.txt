@@ -1,0 +1,6 @@
+disable_camera_led=1
+dtparam=audio=on
+enable_uart=0
+gpu_mem=128
+hdmi_force_hotplug=1
+start_x=1

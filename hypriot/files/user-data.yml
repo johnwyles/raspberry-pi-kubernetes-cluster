@@ -1,0 +1,60 @@
+#cloud-config
+
+hostname: pi1
+apt_preserve_sources_list: true
+manage_etc_hosts: true
+
+resize_rootfs: true
+growpart:
+    mode: auto
+    devices: ["/"]
+    ignore_growroot_disabled: false
+
+locale: "en_US.UTF-8"
+timezone: "America/Los_Angeles"
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+packages:
+  - ntp
+
+users:
+  - name: pi
+    primary-group: users
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users,docker,adm,dialout,audio,plugdev,netdev,video
+    ssh-import-id: None
+    lock_passwd: true
+    ssh-authorized-keys:
+      - ssh-rsa AAAA_SSH_PUBLIC_KEY_NNNN
+
+write_files:
+  - content: |
+      allow-hotplug wlan0
+      iface wlan0 inet static
+        address 192.168.1.101
+        netmask 255.255.255.0
+        gateway 192.168.1.1
+        dns-nameservers 8.8.8.8 8.8.4.4
+      wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+      iface default inet static
+    path: /etc/network/interfaces.d/wlan0
+  - content: |
+      country=de
+      ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+      update_config=1
+      network={
+        ssid="WIFI_SSID"
+        psk="WIFI_PASSWORD"
+        proto=RSN
+        key_mgmt=WPA-PSK
+        pairwise=CCMP
+        auth_alg=OPEN
+      }
+    path: /etc/wpa_supplicant/wpa_supplicant.conf
+
+runcmd:
+  - [ systemctl, restart, avahi-daemon ]
+

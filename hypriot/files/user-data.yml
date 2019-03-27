@@ -57,3 +57,4 @@ write_files:
 
 runcmd:
   - [ systemctl, restart, avahi-daemon ]
+
